@@ -1,7 +1,7 @@
 ---
 name: subscription-patterns
 description: Use when implementing subscription billing — free trials, intro offers, plan upgrades/downgrades, proration logic, dunning and payment retries, cancellation flows, plan groups, or add-ons. Contains patterns for the full subscription lifecycle.
-license: Apache-2.0
+license: MIT
 metadata:
   author: commet
   version: "1.0.0"

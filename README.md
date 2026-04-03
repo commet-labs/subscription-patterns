@@ -40,4 +40,4 @@ Upgrades are immediate with proration. Downgrades wait until the period ends. Pr
 
 ## License
 
-Apache-2.0
+MIT

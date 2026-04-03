@@ -9,6 +9,6 @@
   },
   "homepage": "https://commet.co",
   "repository": "https://github.com/commet-labs/subscription-patterns",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "keywords": ["subscription", "billing", "proration", "trials", "dunning", "cancellation", "saas", "upgrades", "downgrades", "recurring-payments"]
 }
