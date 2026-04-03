@@ -1,0 +1,14 @@
+{
+  "name": "subscription-patterns",
+  "displayName": "Subscription Patterns",
+  "description": "Universal subscription billing patterns — free trials, proration, plan changes, dunning, cancellation flows, and add-ons. Framework-agnostic patterns with Commet code examples.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Commet",
+    "url": "https://commet.co"
+  },
+  "homepage": "https://commet.co",
+  "repository": "https://github.com/commet-labs/subscription-patterns",
+  "license": "Apache-2.0",
+  "keywords": ["subscription", "billing", "proration", "trials", "dunning", "cancellation", "saas", "upgrades", "downgrades", "recurring-payments"]
+}

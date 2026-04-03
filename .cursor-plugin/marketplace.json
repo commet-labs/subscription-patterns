@@ -1,0 +1,13 @@
+{
+  "name": "subscription-patterns",
+  "owner": {
+    "name": "Commet",
+    "email": "decker@commet.co"
+  },
+  "plugins": [
+    {
+      "name": "subscription-patterns",
+      "source": "./"
+    }
+  ]
+}
