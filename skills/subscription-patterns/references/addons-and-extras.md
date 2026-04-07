@@ -139,7 +139,7 @@ Each feature can only have one add-on per organization. A customer cannot activa
 ```typescript
 const { data } = await commet.features.check({
   code: "priority_support",
-  externalId: "user_123",
+  customerId: "user_123",
 });
 // data.allowed = true if add-on is active (or included in plan)
 ```
@@ -149,7 +149,7 @@ const { data } = await commet.features.check({
 ```typescript
 const { data } = await commet.features.get({
   code: "extra_storage",
-  externalId: "user_123",
+  customerId: "user_123",
 });
 // data.current = 35 (GB used)
 // data.included = 50 (from add-on)
@@ -161,7 +161,7 @@ const { data } = await commet.features.get({
 
 ```typescript
 await commet.usage.track({
-  externalId: "user_123",
+  customerId: "user_123",
   feature: "extra_storage",
   value: 5, // 5 GB uploaded
 });
@@ -170,7 +170,7 @@ await commet.usage.track({
 ### Customer portal for self-service add-on management
 
 ```typescript
-const { data } = await commet.portal.getUrl({ externalId: "user_123" });
+const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 // Portal shows available add-ons with prorated price preview
 // Customers can activate/deactivate from here
 ```

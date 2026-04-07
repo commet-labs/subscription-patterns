@@ -84,7 +84,7 @@ A canceled customer can subscribe again, but it is treated as a **new subscripti
 ```typescript
 // Customer who canceled wants to come back
 const { data: sub } = await commet.subscriptions.create({
-  externalId: "user_123",
+  customerId: "user_123",
   planCode: "pro", // Must be a public plan
   successUrl: "https://app.example.com/welcome-back",
 });
@@ -117,7 +117,7 @@ const cheaperPlans = plans.filter(
 Let customers manage their own cancellation through the portal, which can present plan alternatives:
 
 ```typescript
-const { data } = await commet.portal.getUrl({ externalId: "user_123" });
+const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 // Portal shows plan comparison before confirming cancellation
 ```
 

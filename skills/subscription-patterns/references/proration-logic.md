@@ -175,7 +175,7 @@ const { start, end, daysRemaining } = sub.currentPeriod;
 ### Present upgrade cost preview via customer portal
 
 ```typescript
-const { data } = await commet.portal.getUrl({ externalId: "user_123" });
+const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 // Portal shows prorated cost comparison before customer confirms
 ```
 

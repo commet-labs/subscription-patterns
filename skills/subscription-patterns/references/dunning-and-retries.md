@@ -105,7 +105,7 @@ switch (payload.event) {
 The simplest recovery path: send the customer to their portal where they can update their payment method.
 
 ```typescript
-const { data } = await commet.portal.getUrl({ externalId: "user_123" });
+const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 // Include data.portalUrl in your "update payment method" email
 ```
 

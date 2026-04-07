@@ -33,7 +33,7 @@ Sometimes you want to bypass the trial for a specific customer:
 
 ```typescript
 const { data: sub } = await commet.subscriptions.create({
-  externalId: "user_123",
+  customerId: "user_123",
   planCode: "pro",
   skipTrial: true,
 });
@@ -133,7 +133,7 @@ However, at checkout, intro offers and promo codes are **mutually exclusive**. A
 
 ```typescript
 const { data: sub } = await commet.subscriptions.create({
-  externalId: "user_123",
+  customerId: "user_123",
   planCode: "pro",
   successUrl: "https://app.example.com/welcome",
 });
@@ -159,7 +159,7 @@ if (sub.status === "trialing") {
 ```typescript
 const { data } = await commet.features.check({
   code: "advanced_analytics",
-  externalId: "user_123",
+  customerId: "user_123",
 });
 // data.allowed = true (full access during trial)
 ```

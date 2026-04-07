@@ -99,7 +99,7 @@ Plan changes only happen within the same **plan group**. A plan group defines wh
 
 ```typescript
 const { data: sub } = await commet.subscriptions.create({
-  externalId: "user_123",
+  customerId: "user_123",
   planCode: "starter",
   billingInterval: "monthly",
   successUrl: "https://app.example.com/welcome",
@@ -131,7 +131,7 @@ const { data: plans } = await commet.plans.list();
 ### Generate customer portal for self-service plan changes
 
 ```typescript
-const { data } = await commet.portal.getUrl({ externalId: "user_123" });
+const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 // data.portalUrl -> customer can upgrade/downgrade from here
 ```
 
