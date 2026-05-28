@@ -114,7 +114,7 @@ const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 Proactively check subscription status to catch issues early:
 
 ```typescript
-const { data: sub } = await commet.subscriptions.get("user_123");
+const { data: sub } = await commet.subscriptions.getActive({ customerId: "user_123" });
 
 if (sub.status === "past_due") {
   // Show in-app banner: "Payment issue — update your payment method"
@@ -127,7 +127,7 @@ if (sub.status === "past_due") {
 Instead of hard-blocking on `past_due`, you can show warnings while maintaining access:
 
 ```typescript
-const { data: sub } = await commet.subscriptions.get("user_123");
+const { data: sub } = await commet.subscriptions.getActive({ customerId: "user_123" });
 
 if (sub.status === "past_due") {
   // Show banner but don't block

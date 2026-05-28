@@ -110,7 +110,7 @@ const { data: sub } = await commet.subscriptions.create({
 ### Check current subscription before presenting upgrade options
 
 ```typescript
-const { data: sub } = await commet.subscriptions.get("user_123");
+const { data: sub } = await commet.subscriptions.getActive({ customerId: "user_123" });
 
 // sub.plan.name = "Starter"
 // sub.plan.basePrice = 2900 (cents)

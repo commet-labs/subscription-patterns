@@ -29,7 +29,7 @@ The customer can continue using all features until the billing period expires. N
 
 ```typescript
 await commet.subscriptions.cancel({
-  subscriptionId: "sub_xxx",
+  id: "sub_xxx",
   reason: "Too expensive",
   // immediate defaults to false -> cancels at period end
 });
@@ -48,7 +48,7 @@ Customer requests immediate cancellation
 
 ```typescript
 await commet.subscriptions.cancel({
-  subscriptionId: "sub_xxx",
+  id: "sub_xxx",
   reason: "Duplicate account",
   immediate: true,
 });
@@ -154,7 +154,7 @@ Tracking why customers cancel helps identify patterns:
 
 ```typescript
 await commet.subscriptions.cancel({
-  subscriptionId: "sub_xxx",
+  id: "sub_xxx",
   reason: "Missing feature: SSO", // Free-text reason
 });
 ```

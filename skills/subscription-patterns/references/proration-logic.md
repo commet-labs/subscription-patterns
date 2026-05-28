@@ -166,7 +166,7 @@ Each customer pays what was in effect at the start of **their** period.
 ### Check current period and remaining days
 
 ```typescript
-const { data: sub } = await commet.subscriptions.get("user_123");
+const { data: sub } = await commet.subscriptions.getActive({ customerId: "user_123" });
 
 const { start, end, daysRemaining } = sub.currentPeriod;
 // Use daysRemaining to estimate proration before showing upgrade UI
@@ -185,7 +185,7 @@ const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 const { data: features } = await commet.features.list("user_123");
 
 for (const feature of features) {
-  if (feature.type === "metered" && feature.overage > 0) {
+  if (feature.type === "usage" && feature.overage > 0) {
     // This overage will be settled on upgrade
     // feature.current = total used
     // feature.included = plan's included amount

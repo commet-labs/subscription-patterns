@@ -146,7 +146,7 @@ const { data: sub } = await commet.subscriptions.create({
 ### Check subscription status during trial
 
 ```typescript
-const { data: sub } = await commet.subscriptions.get("user_123");
+const { data: sub } = await commet.subscriptions.getActive({ customerId: "user_123" });
 
 if (sub.status === "trialing") {
   // Customer is in free trial
@@ -157,7 +157,7 @@ if (sub.status === "trialing") {
 ### Check feature access (works the same during trial)
 
 ```typescript
-const { data } = await commet.features.check({
+const { data } = await commet.features.get({
   code: "advanced_analytics",
   customerId: "user_123",
 });
