@@ -137,7 +137,7 @@ Each feature can only have one add-on per organization. A customer cannot activa
 ### Check feature access (works for plan features and add-on features)
 
 ```typescript
-const { data } = await commet.features.get({
+const { data } = await commet.featureAccess.get({
   code: "priority_support",
   customerId: "user_123",
 });
@@ -147,7 +147,7 @@ const { data } = await commet.features.get({
 ### Get detailed feature info
 
 ```typescript
-const { data } = await commet.features.get({
+const { data } = await commet.featureAccess.get({
   code: "extra_storage",
   customerId: "user_123",
 });
@@ -178,7 +178,7 @@ const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 ### List all features (plan + add-ons combined)
 
 ```typescript
-const { data: features } = await commet.features.list("user_123");
+const { data: features } = await commet.featureAccess.list({ customerId: "user_123" });
 
 for (const feature of features) {
   // feature.code, feature.name, feature.type

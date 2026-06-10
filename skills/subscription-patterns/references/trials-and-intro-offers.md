@@ -157,7 +157,7 @@ if (sub.status === "trialing") {
 ### Check feature access (works the same during trial)
 
 ```typescript
-const { data } = await commet.features.get({
+const { data } = await commet.featureAccess.get({
   code: "advanced_analytics",
   customerId: "user_123",
 });

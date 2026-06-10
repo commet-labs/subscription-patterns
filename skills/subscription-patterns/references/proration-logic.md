@@ -182,7 +182,7 @@ const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 ### Track usage to understand pending overage before upgrade
 
 ```typescript
-const { data: features } = await commet.features.list("user_123");
+const { data: features } = await commet.featureAccess.list({ customerId: "user_123" });
 
 for (const feature of features) {
   if (feature.type === "usage" && feature.overage > 0) {
