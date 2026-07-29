@@ -32,7 +32,7 @@ When the trial ends, the system charges the price **in effect at that moment** �
 Sometimes you want to bypass the trial for a specific customer:
 
 ```typescript
-const { data: sub } = await commet.subscriptions.create({
+const sub = await commet.subscriptions.create({
   customerId: "user_123",
   planCode: "pro",
   skipTrial: true,
@@ -49,18 +49,17 @@ const { data: sub } = await commet.subscriptions.create({
 
 ## Intro Offers
 
-An intro offer is a discount applied to the first N billing cycles of a paid subscription. It activates automatically for eligible customers.
+An Introductory Offer is a first-class Offer attached to a plan price. It can include a free-trial phase and a discounted phase, and it activates automatically for eligible customers unless checkout explicitly selects a Promotional Offer.
 
 ### How Intro Offers Work
 
 ```
 New customer subscribes
-  → System checks eligibility (no previous subscriptions)
-  → Intro offer applied: discounted price for N cycles
-  → subscription.introOfferEndsAt set
-  → Each invoice checks: is introOfferEndsAt > now?
-  → Yes: apply discount line to invoice
-  → After N cycles: normal pricing automatically
+  → System checks current eligibility
+  → Price's automatic Introductory Offer is selected
+  → Accepted phases are persisted as an immutable Offer Application
+  → Discount applies to the plan-base line for its configured cycles
+  → After the phases finish: normal pricing automatically
 ```
 
 ### Discount Types
@@ -74,16 +73,14 @@ Percentage values use basis points (10000 = 100%). A 25% discount is stored as `
 
 ### Eligibility
 
-Intro offers are strictly for new customers. One lifetime per customer.
+Current eligibility excludes a customer who already has an `active` or `past_due` subscription in the organization. Historical canceled subscriptions do not create a lifetime ban.
 
 | Customer Type | Eligible? |
 |---------------|-----------|
-| New customer (no previous subscriptions) | Yes |
-| Had a subscription before (active, canceled, expired) | No |
+| No active or past-due subscription | Yes |
+| Active or past-due subscription | No |
+| Previously canceled subscription | Yes, if no current blocker remains |
 | Active customer upgrading/downgrading | No |
-| Had a trial but didn't convert | No |
-
-The rule is simple: if ANY previous subscription exists in any state, the customer is not eligible.
 
 ### Intro Offer + Plan Change
 
@@ -98,9 +95,9 @@ Customer on Starter $99/mo with 50% intro offer (paying $49.50)
   Billed: $174.25
 ```
 
-### Toggle Behavior
+### Catalog Changes
 
-Turning off `introOfferEnabled` on a plan only affects **new subscriptions**. Existing subscriptions keep their discount running until `introOfferEndsAt`.
+Updating, deactivating, or archiving an Offer changes future selection only. Existing subscriptions keep the accepted phases stored in their Offer Application. That immutable boundary applies to the Offer terms, not the selected plan price: renewals still read the current catalog amount of the selected price.
 
 ## Trials + Intro Offers Together
 
@@ -115,7 +112,7 @@ Timeline:
   Month 4+:   $99/mo (normal price)
 ```
 
-However, at checkout, intro offers and promo codes are **mutually exclusive**. A customer either gets the intro offer or applies a promo code, never both on the same checkout.
+At checkout, Commet resolves one Offer source. Omitting `offerId` allows the price's automatic Introductory Offer when the customer is eligible. Passing a Promotional `offerId` overrides it. Promo codes also resolve to a Promotional Offer, but validation rejects the code with `intro_offer_active` while an eligible automatic Introductory Offer applies.
 
 ## Gotchas
 
@@ -123,30 +120,31 @@ However, at checkout, intro offers and promo codes are **mutually exclusive**. A
 
 **Intro offer credit uses effective price.** When calculating proration credits for a plan change, the credit is based on the discounted amount the customer actually paid, not the list price.
 
-**One intro offer per lifetime.** Even if the customer cancels and resubscribes months later, they do not get another intro offer. The system checks for any previous subscription in any state.
+**Eligibility is not a lifetime-history rule.** It currently blocks active and past-due subscriptions. Verify the creation service before changing this policy.
 
-**Intro offers apply per-currency.** Plans can define different intro offers per currency. At checkout, the system uses the currency-specific intro offer if one exists, otherwise falls back to the base plan's intro offer.
+**Currency-specific Offer phases are explicit.** `amount_off` and `fixed_price` phases carry an amount for each supported currency. Commet does not silently fall back across currencies.
 
 ## Code Examples
 
 ### Create a subscription (trial auto-applies from plan config)
 
 ```typescript
-const { data: sub } = await commet.subscriptions.create({
+const sub = await commet.subscriptions.create({
   customerId: "user_123",
   planCode: "pro",
   successUrl: "https://app.example.com/welcome",
 });
 
 // If plan has trialDays: customer completes setup checkout (no charge)
-// If plan has intro offer and customer is eligible: discount auto-applies
+// If the selected price has an automatic Intro Offer and the customer is
+// eligible, it applies when offerId is omitted.
 // sub.checkoutUrl -> redirect customer here
 ```
 
 ### Check subscription status during trial
 
 ```typescript
-const { data: sub } = await commet.subscriptions.getActive({ customerId: "user_123" });
+const sub = await commet.subscriptions.getActive({ customerId: "user_123" });
 
 if (sub.status === "trialing") {
   // Customer is in free trial
@@ -157,9 +155,9 @@ if (sub.status === "trialing") {
 ### Check feature access (works the same during trial)
 
 ```typescript
-const { data } = await commet.featureAccess.get({
+const access = await commet.featureAccess.get({
   code: "advanced_analytics",
   customerId: "user_123",
 });
-// data.allowed = true (full access during trial)
+// access.allowed = true (full access during trial)
 ```

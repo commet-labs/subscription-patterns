@@ -83,7 +83,7 @@ Invoice for Feb 1 - Feb 28:
   Total:                    $167.00
 ```
 
-Add-on lines appear after the plan base but before feature overages. Discounts (intro offers, promo codes) apply to the entire invoice including add-on lines.
+Add-on lines appear after the plan base but before feature overages. Current Introductory and Promotional Offer discounts apply only to the plan-base line, not add-ons or feature overages.
 
 ## Add-on Features
 
@@ -137,24 +137,24 @@ Each feature can only have one add-on per organization. A customer cannot activa
 ### Check feature access (works for plan features and add-on features)
 
 ```typescript
-const { data } = await commet.featureAccess.get({
+const access = await commet.featureAccess.get({
   code: "priority_support",
   customerId: "user_123",
 });
-// data.allowed = true if add-on is active (or included in plan)
+// access.allowed = true if add-on is active (or included in plan)
 ```
 
 ### Get detailed feature info
 
 ```typescript
-const { data } = await commet.featureAccess.get({
+const access = await commet.featureAccess.get({
   code: "extra_storage",
   customerId: "user_123",
 });
-// data.current = 35 (GB used)
-// data.included = 50 (from add-on)
-// data.remaining = 15
-// data.overage = 0
+// access.current = 35 (GB used)
+// access.included = 50 (from add-on)
+// access.remaining = 15
+// access.overage = 0
 ```
 
 ### Track usage against an add-on's metered feature
@@ -162,7 +162,7 @@ const { data } = await commet.featureAccess.get({
 ```typescript
 await commet.usage.track({
   customerId: "user_123",
-  feature: "extra_storage",
+  featureCode: "extra_storage",
   value: 5, // 5 GB uploaded
 });
 ```
@@ -170,7 +170,7 @@ await commet.usage.track({
 ### Customer portal for self-service add-on management
 
 ```typescript
-const { data } = await commet.portal.getUrl({ customerId: "user_123" });
+const portal = await commet.portal.getUrl({ customerId: "user_123" });
 // Portal shows available add-ons with prorated price preview
 // Customers can activate/deactivate from here
 ```

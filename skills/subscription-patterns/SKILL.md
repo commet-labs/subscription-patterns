@@ -7,13 +7,6 @@ metadata:
   version: "1.0.0"
   homepage: https://commet.co
   source: https://github.com/commet-labs/subscription-patterns
-references:
-  - references/trials-and-intro-offers.md
-  - references/upgrades-downgrades.md
-  - references/proration-logic.md
-  - references/dunning-and-retries.md
-  - references/cancellation-flows.md
-  - references/addons-and-extras.md
 ---
 
 # Subscription Billing Patterns
@@ -25,15 +18,17 @@ Universal patterns for the full subscription lifecycle. These apply to any billi
 Every subscription moves through these states:
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │                                     v
 draft → pending_payment → trialing → active → canceled
-                                       │
-                                       v
-                                     paused → past_due → expired
+                               │          │
+                               └──────────┴→ past_due
+                                              │
+                                              ├→ active
+                                              └→ canceled
 ```
 
-**One active subscription per customer.** States that block a new subscription: `draft`, `pending_payment`, `trialing`, `active`, `paused`, `past_due`. States that allow a new one: `canceled`, `expired`.
+The persisted statuses are `draft`, `pending_payment`, `trialing`, `active`, `past_due`, and `canceled`. Commet does not expose a pause/resume status.
+
+**One active subscription relationship per customer.** Treat the active endpoint and current API errors as the source of truth when deciding whether a new subscription may be created. Do not recreate lifecycle rules from stale status lists.
 
 ## Quick Reference
 
@@ -55,13 +50,4 @@ draft → pending_payment → trialing → active → canceled
 
 ## Key Principle
 
-Every subscription change follows one rule:
-
-| Change Type | When Applied |
-|-------------|--------------|
-| Benefits customer | **Immediately** |
-| Hurts customer | **At renewal** |
-
-This means: upgrades are immediate (customer gets value now). Downgrades wait until the period ends (customer keeps what they paid for). Price increases take effect at renewal (customer paid for the current period already). Price decreases also apply at renewal for consistency.
-
-This single principle drives every pattern in this skill and eliminates ambiguity about when any change should take effect.
+Do not infer subscription behavior from a generic fairness rule. In Commet, plan changes are classified from billing interval, plan-group order, and paid/free transitions. Price edits affect renewal through the selected catalog price, while accepted Offer phases remain immutable. Use the linked reference for the exact operation you are implementing.

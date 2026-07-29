@@ -23,14 +23,7 @@ npx skills add commet-labs/subscription-patterns
 
 ## Key Principle
 
-Every subscription change follows one rule:
-
-| Change Type | When Applied |
-|-------------|--------------|
-| Benefits customer | Immediately |
-| Hurts customer | At renewal |
-
-Upgrades are immediate with proration. Downgrades wait until the period ends. Price increases take effect at renewal. This principle drives every pattern in this skill.
+Subscription behavior must be explicit per operation. In Commet, plan changes use billing-interval direction, plan-group `sortOrder`, and paid/free transitions; price alone never classifies an upgrade or downgrade.
 
 ## Links
 

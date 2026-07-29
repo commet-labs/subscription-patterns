@@ -59,36 +59,32 @@ await commet.subscriptions.cancel({
 | Resource | End-of-Period | Immediate |
 |----------|--------------|-----------|
 | Feature access | Until period end | Revoked now |
-| Plan credits | Until period end, then reset to 0 | Reset to 0 now |
-| Plan balance | Until period end, then reset to 0 | Reset to 0 now |
-| Purchased credits | **Preserved** | **Preserved** |
+| Plan credits | Until period end | Access revoked now |
+| Plan balance | Until period end | Access revoked now |
+| Purchased credits | Persisted | Persisted |
 | Usage counters | Continue until period end | Stopped |
 | Seats | Active until period end | Released |
 
-Purchased credits are never forfeited. They survive cancellation and are restored if the customer reactivates.
+Cancellation does not erase the persisted subscription balance. Access follows subscription state.
 
 ## Reactivation
 
-A canceled customer can subscribe again, but it is treated as a **new subscription** with specific rules:
+A canceled paid subscription can be reactivated through the dedicated operation. Commet charges first, then restores the same subscription relationship with a new period anchored to the reactivation date.
 
 | Aspect | Behavior |
 |--------|----------|
-| Pricing | Current plan price (not what they previously paid) |
-| Intro offer | **Not eligible** (had a subscription before) |
-| Purchased credits | Restored (they were preserved) |
-| Plan credits/balance | Fresh allocation from new plan |
-| Deprecated plans | Cannot re-subscribe to plans with `isPublic = false` |
+| Pricing | Current value of the selected catalog price |
+| Offer | Optional Promotional `offerId`; accepted phases are snapshotted |
+| Balance | Existing initialized balance is not automatically reset |
+| Subscription identity | Same subscription record |
 
 ### Code Example
 
 ```typescript
-// Customer who canceled wants to come back
-const { data: sub } = await commet.subscriptions.create({
-  customerId: "user_123",
-  planCode: "pro", // Must be a public plan
-  successUrl: "https://app.example.com/welcome-back",
+const sub = await commet.subscriptions.reactivate({
+  id: "sub_xxx",
 });
-// sub.checkoutUrl -> new payment checkout (no intro offer)
+// sub.status === "active" after the reactivation charge succeeds
 ```
 
 ## Save Offers (Retention Strategies)
@@ -117,27 +113,13 @@ const cheaperPlans = plans.filter(
 Let customers manage their own cancellation through the portal, which can present plan alternatives:
 
 ```typescript
-const { data } = await commet.portal.getUrl({ customerId: "user_123" });
+const portal = await commet.portal.getUrl({ customerId: "user_123" });
 // Portal shows plan comparison before confirming cancellation
 ```
 
-### 3. Pause Instead of Cancel
-
-If your system supports pausing, offer it as an alternative. Paused subscriptions skip billing with no access, but the subscription is not terminated.
-
-| Aspect | Pause | Cancel |
-|--------|-------|--------|
-| Status | `paused` | `canceled` |
-| Access | No | No |
-| Billing | Skipped | Stopped |
-| Resume | Same subscription, current price | New subscription, current price, no intro offer |
-| Plan credits | Frozen | Lost |
-
-On resume from pause, the price in effect at time of resuming applies. Pausing does not freeze the price.
-
 ## Reactivation Within Period
 
-If a customer cancels with end-of-period and then changes their mind before the period ends, the cancellation can be reversed. The customer stays on their current plan as if nothing happened.
+If a customer schedules an end-of-period cancellation and changes their mind before it takes effect, use `subscriptions.uncancel`. The customer stays on the current relationship without a reactivation charge.
 
 ## Data Retention
 
@@ -146,7 +128,7 @@ After cancellation:
 - Subscription record persists with `canceled` status
 - Invoices and payment history retained
 - Purchased credits retained on the customer
-- Plan credits, balance, and usage data cleared
+- Subscription balance history retained
 
 ## Cancellation Reasons
 
@@ -168,10 +150,8 @@ Common categories to analyze:
 
 ## Gotchas
 
-**Reactivation is a new subscription.** The customer does not get their old subscription back. They go through checkout again with current pricing and no intro offer.
+**Reactivation reuses the subscription.** It charges the current selected catalog price and restores state only after successful payment.
 
-**Deprecated plans block resubscription.** If the plan was set to `isPublic = false` after the customer originally subscribed, they cannot resubscribe to it. They must choose a currently public plan.
+**Uncancel and reactivate are different.** `uncancel` reverses a scheduled cancellation before it takes effect. `reactivate` restores an already canceled subscription and creates a new paid period.
 
-**Purchased credits persist indefinitely.** Even across cancellation and reactivation cycles, purchased credits are never lost. They restore automatically when the customer creates a new subscription.
-
-**Price at resume is not frozen.** If a customer pauses and the price changes before they resume, they pay the new price. Pausing is not a price lock.
+**Balance rows persist.** Do not add an application-side “restore” or “reset” step around reactivation.

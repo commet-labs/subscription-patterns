@@ -10,8 +10,7 @@ When a payment fails, the subscription enters a grace period before cancellation
 Invoice generated → Payment attempt fails
   → Status: past_due
   → Grace period begins (access maintained)
-  → Retry 1 (same day)
-  → Retry 2 (same day)
+  → Automatic retries on days 1, 3, 5, and 7
   → All retries exhausted and still unpaid
   → Status: canceled
 ```
@@ -29,15 +28,15 @@ Invoice generated → Payment attempt fails
 
 During `past_due`, the customer retains full access to their subscription. This is intentional — cutting access immediately on a transient payment failure (expired card, temporary bank hold) creates a terrible experience and increases churn unnecessarily.
 
-The system performs 2 retries during the grace period day. If payment succeeds on any retry, the subscription returns to `active` seamlessly.
+The original renewal decline is day 0. Automatic retries are anchored to that instant on days 1, 3, 5, and 7. If a retry succeeds, the subscription returns to `active` without creating a new subscription. The fourth declined retry exhausts dunning and cancels the subscription.
 
 ## What Happens to Consumption
 
 | Resource | During past_due | On Cancellation |
 |----------|----------------|-----------------|
-| Plan credits | Maintained | Reset to 0 |
-| Plan balance | Maintained | Reset to 0 |
-| Purchased credits | Maintained | **Preserved** |
+| Plan credits | Maintained | Persisted; access follows subscription state |
+| Plan balance | Maintained | Persisted; access follows subscription state |
+| Purchased credits | Maintained | Persisted |
 | Usage counters | Continue tracking | Stopped |
 | Feature access | Full access | Revoked |
 
@@ -105,8 +104,8 @@ switch (payload.event) {
 The simplest recovery path: send the customer to their portal where they can update their payment method.
 
 ```typescript
-const { data } = await commet.portal.getUrl({ customerId: "user_123" });
-// Include data.portalUrl in your "update payment method" email
+const portal = await commet.portal.getUrl({ customerId: "user_123" });
+// Include portal.portalUrl in your "update payment method" email
 ```
 
 ### 2. Prevention: Monitor Subscription Status
@@ -114,7 +113,7 @@ const { data } = await commet.portal.getUrl({ customerId: "user_123" });
 Proactively check subscription status to catch issues early:
 
 ```typescript
-const { data: sub } = await commet.subscriptions.getActive({ customerId: "user_123" });
+const sub = await commet.subscriptions.getActive({ customerId: "user_123" });
 
 if (sub.status === "past_due") {
   // Show in-app banner: "Payment issue — update your payment method"
@@ -127,7 +126,7 @@ if (sub.status === "past_due") {
 Instead of hard-blocking on `past_due`, you can show warnings while maintaining access:
 
 ```typescript
-const { data: sub } = await commet.subscriptions.getActive({ customerId: "user_123" });
+const sub = await commet.subscriptions.getActive({ customerId: "user_123" });
 
 if (sub.status === "past_due") {
   // Show banner but don't block
@@ -142,7 +141,7 @@ if (sub.status === "canceled") {
 
 ## Currency and Failed Retries
 
-If a payment fails and the retry happens after currency resolution changes (e.g., customer updated their billing address), the currency is re-resolved and the checkout session resets to `pending`. The subscription's currency is only immutable after a successful first payment.
+Before the first successful payment, reopening checkout may resolve presentment again from the current checkout context. Once activated, renewal and dunning stay bound to the subscription's currency, saved payment method, and provider connection; a billing-address change does not silently move a retry to another rail.
 
 ## Metrics to Track
 
@@ -157,6 +156,6 @@ If a payment fails and the retry happens after currency resolution changes (e.g.
 
 **Access continues during `past_due`.** This is by design. Do not add custom logic to block access during the grace period — it increases churn without improving recovery.
 
-**Purchased credits survive cancellation.** If a customer reactivates after involuntary churn, their purchased credits are restored. Plan credits and balance reset to 0.
+**Cancellation does not erase the stored balance row.** Access still follows subscription state. Reactivation charges first and reuses the existing relationship; it does not automatically reinitialize an already initialized balance.
 
-**Retries happen on the same day.** The retry window is short (2 retries during the day of failure). If you need longer recovery windows, use proactive email sequences to get the customer to update their payment method before the retries exhaust.
+**Retries use an anchored schedule.** The current automatic retry days are 1, 3, 5, and 7 after the original decline. Manual and scheduled retries share the same claim protocol, so do not build a second retry scheduler around them.

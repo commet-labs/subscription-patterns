@@ -1,19 +1,22 @@
 # Upgrades and Downgrades
 
-How to handle plan changes within a subscription. The core question is always: does this change benefit or hurt the customer?
+How Commet handles plan changes within a subscription. Scheduling is explicit; it is not inferred from which plan costs more.
 
 ## The Rule
 
 | Change | When Applied | Why |
 |--------|-------------|-----|
-| Upgrade (more expensive plan) | **Immediately** | Customer wants more value now |
-| Downgrade (cheaper plan) | **At end of period** | Customer already paid for current period |
+| Higher `sortOrder` in the same plan group | **Immediately** | The catalog defines this direction as an upgrade |
+| Lower `sortOrder` in the same plan group | **At end of period** | The catalog defines this direction as a downgrade |
+| Shorter to longer billing interval | **Immediately** | Interval upgrade |
+| Longer to shorter billing interval | **At end of period** | Interval downgrade |
+| Paid plan to free plan | **At end of period** | Preserve the paid period |
 
-This eliminates all ambiguity. You never need to decide "should this be immediate?" — just compare the prices.
+Price alone does not classify a change. Configure plan-group ordering intentionally.
 
 ## Upgrades
 
-An upgrade means the customer moves to a more expensive plan. It takes effect immediately with proration.
+An upgrade means the customer moves to a higher-ordered plan in the same group or to a longer billing interval. It takes effect immediately with proration.
 
 ### What Happens on Upgrade
 
@@ -53,7 +56,7 @@ Immediate. The customer gets the new plan's features, limits, and allocations th
 
 ## Downgrades
 
-A downgrade means the customer moves to a cheaper plan. It takes effect at the end of the current billing period.
+A downgrade means the customer moves to a lower-ordered plan in the same group, a shorter billing interval, or a free plan. It takes effect at the end of the current billing period.
 
 ### What Happens on Downgrade
 
@@ -74,20 +77,14 @@ Similarly, if current usage exceeds the new plan's included amount, the change i
 
 ## Billing Interval Changes
 
-Changing the billing interval (monthly/yearly) on the same plan follows the same benefit/hurt rule.
+Changing the billing interval uses a fixed order: weekly, monthly, quarterly, yearly.
 
 | Change | When Applied | Reasoning |
 |--------|-------------|-----------|
 | Monthly to yearly | **Immediate** | Commitment upgrade, usually better per-month price |
 | Yearly to monthly | **At end of period** | Commitment downgrade, customer paid for the year |
 
-### Upgrade + Interval Change Simultaneously
-
-Treated as a normal upgrade (more expensive = immediate). The system evaluates the total cost change, not each dimension separately.
-
-### Downgrade + Interval Change Simultaneously
-
-Treated as a downgrade (cheaper = at renewal). Customer enjoys their full current period.
+Interval direction is evaluated before plan-group order. A move to a longer interval is immediate even when the target plan has a lower order; a move to a shorter interval is scheduled even when the target plan has a higher order. When the interval stays the same, plan-group order decides.
 
 ## Plan Groups
 
@@ -98,7 +95,7 @@ Plan changes only happen within the same **plan group**. A plan group defines wh
 ### Create a subscription the customer can later upgrade
 
 ```typescript
-const { data: sub } = await commet.subscriptions.create({
+const sub = await commet.subscriptions.create({
   customerId: "user_123",
   planCode: "starter",
   billingInterval: "monthly",
@@ -110,7 +107,7 @@ const { data: sub } = await commet.subscriptions.create({
 ### Check current subscription before presenting upgrade options
 
 ```typescript
-const { data: sub } = await commet.subscriptions.getActive({ customerId: "user_123" });
+const sub = await commet.subscriptions.getActive({ customerId: "user_123" });
 
 // sub.plan.name = "Starter"
 // sub.plan.basePrice = 2900 (cents)
@@ -131,8 +128,8 @@ const { data: plans } = await commet.plans.list();
 ### Generate customer portal for self-service plan changes
 
 ```typescript
-const { data } = await commet.portal.getUrl({ customerId: "user_123" });
-// data.portalUrl -> customer can upgrade/downgrade from here
+const portal = await commet.portal.getUrl({ customerId: "user_123" });
+// portal.portalUrl -> customer can upgrade/downgrade from here
 ```
 
 The customer portal handles plan changes, proration preview, and payment automatically. Customers see a comparison of their current plan vs available plans, with prorated amounts calculated before they confirm.
