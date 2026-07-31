@@ -1,6 +1,6 @@
-# Trials and Intro Offers
+# Trials and Introductory Placement
 
-Two distinct mechanisms for reducing the barrier to a first subscription. They serve different goals: trials let customers evaluate the product for free, intro offers reduce the price for the first N billing cycles.
+A trial and an introductory discount are phases of the same independent Offer model. A `free_trial` phase delays the first charge; a discount phase changes the plan-base amount for one or more billing cycles. Introductory placement determines automatic eligible-customer selection.
 
 ## Free Trials
 
@@ -21,7 +21,7 @@ Customer subscribes to plan with trial
 
 ### Trial Configuration
 
-Trial duration is set on the plan price (`trialDays`). When the customer completes setup checkout, the subscription stores `trialEndsAt` calculated from that moment.
+Create an Offer with a first `free_trial` phase. Attach a compatible Offer to one base plan price for automatic introductory selection, or pass it directly with `offerId`. The `trialDays` and `customTrialDays` request fields remain compatibility shortcuts; accepted terms are still recorded as an Offer Application.
 
 ### Trial Conversion
 
@@ -49,7 +49,7 @@ const sub = await commet.subscriptions.create({
 
 ## Intro Offers
 
-An Introductory Offer is a first-class Offer attached to a plan price. It can include a free-trial phase and a discounted phase, and it activates automatically for eligible customers unless checkout explicitly selects a Promotional Offer.
+An Introductory Offer is not a separate catalog type. It is an independent Offer attached to one base plan price through introductory placement. It may include an optional first free-trial phase and at most one finite discount phase. It activates automatically for eligible customers unless checkout receives an explicit `offerId`.
 
 ### How Intro Offers Work
 
@@ -84,14 +84,14 @@ Current eligibility excludes a customer who already has an `active` or `past_due
 
 ### Intro Offer + Plan Change
 
-When a customer changes plans, the intro offer is **lost**. The proration credit is based on what the customer actually paid (the discounted amount), not the list price. The new plan starts at normal price with no intro offer.
+When a customer changes plans, the prior Offer Application ends. The proration credit is based on what the customer actually paid, not the list price. An immediate plan change may apply a new direct `offerId`; otherwise the new plan starts at normal price. A scheduled plan change does not accept an Offer.
 
 ```
 Customer on Starter $99/mo with 50% intro offer (paying $49.50)
   Upgrades to Pro $199/mo on day 15 (15/30 days remaining)
 
   Credit: $49.50 x (15/30) = $24.75  (based on what was paid)
-  Charge: $199 (full price, no intro offer on new plan)
+  Charge: $199 (full price when no new offerId is supplied)
   Billed: $174.25
 ```
 
@@ -101,7 +101,7 @@ Updating, deactivating, or archiving an Offer changes future selection only. Exi
 
 ## Trials + Intro Offers Together
 
-Trials and intro offers are **independent and can be combined**. A plan can have both: the customer gets a free trial first, then pays the discounted intro offer price for N cycles, then transitions to normal pricing.
+One Offer can contain the trial and introductory discount in order. The customer gets the free trial first, then pays the discounted price for N cycles, then transitions to normal pricing.
 
 ```
 Plan: Pro $99/mo, 14-day trial, 50% off for 3 months
@@ -112,7 +112,7 @@ Timeline:
   Month 4+:   $99/mo (normal price)
 ```
 
-At checkout, Commet resolves one Offer source. Omitting `offerId` allows the price's automatic Introductory Offer when the customer is eligible. Passing a Promotional `offerId` overrides it. Promo codes also resolve to a Promotional Offer, but validation rejects the code with `intro_offer_active` while an eligible automatic Introductory Offer applies.
+At checkout, Commet resolves one Offer source. Omitting `offerId` allows the price's automatic introductory placement when the customer is eligible. Passing a direct `offerId` overrides it. Promo Codes reference an independent single-discount Offer, but validation rejects the code with `intro_offer_active` while an eligible automatic Introductory Offer applies.
 
 ## Gotchas
 
@@ -135,7 +135,8 @@ const sub = await commet.subscriptions.create({
   successUrl: "https://app.example.com/welcome",
 });
 
-// If plan has trialDays: customer completes setup checkout (no charge)
+// If the selected Offer starts with free_trial, checkout saves the payment method
+// without charging it.
 // If the selected price has an automatic Intro Offer and the customer is
 // eligible, it applies when offerId is omitted.
 // sub.checkoutUrl -> redirect customer here

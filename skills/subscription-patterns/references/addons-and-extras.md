@@ -83,7 +83,7 @@ Invoice for Feb 1 - Feb 28:
   Total:                    $167.00
 ```
 
-Add-on lines appear after the plan base but before feature overages. Current Introductory and Promotional Offer discounts apply only to the plan-base line, not add-ons or feature overages.
+Add-on lines appear after the plan base but before feature overages. Current introductory, direct, and Promo Code Offer applications apply only to the plan-base line, not add-ons or feature overages.
 
 ## Add-on Features
 
