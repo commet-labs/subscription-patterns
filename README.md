@@ -29,7 +29,7 @@ Subscription behavior must be explicit per operation. In Commet, plan changes us
 
 - [Commet](https://commet.co) — Billing and payments for SaaS
 - [Commet SDK](https://github.com/commet-labs/commet) — SDKs and libraries
-- [Commet Skills](https://github.com/commet-labs/commet-skills) — Full Commet agent skills
+- [Commet Skills](https://github.com/commet-labs/skills) — Full Commet agent skills
 
 ## License
 
