@@ -20,6 +20,7 @@ Invoice generated → Payment attempt fails
 | Event | Status Change | Customer Access |
 |-------|--------------|-----------------|
 | Payment fails | `active` -> `past_due` | Maintained |
+| Resume charge after a period-end pause fails | Stays `paused` while retries run | None until paid |
 | During grace period | `past_due` | Maintained |
 | Retry succeeds | `past_due` -> `active` | Maintained (never interrupted) |
 | All retries fail | `past_due` -> `canceled` | Revoked |
@@ -82,11 +83,9 @@ if (!payload) {
 }
 
 switch (payload.event) {
-  case "subscription.updated":
-    if (payload.data.status === "past_due") {
-      // Payment failed — notify customer to update payment method
-      await sendPaymentFailedEmail(payload.data.customerId);
-    }
+  case "subscription.past_due":
+    // Payment failed — notify customer to update payment method
+    await sendPaymentFailedEmail(payload.data.customerId);
     break;
 
   case "subscription.canceled":
@@ -113,9 +112,13 @@ const portal = await commet.portal.getUrl({ customerId: "user_123" });
 Proactively check subscription status to catch issues early:
 
 ```typescript
-const sub = await commet.subscriptions.getActive({ customerId: "user_123" });
+// getActive() returns only active or trialing subscriptions
+const { data: pastDue } = await commet.subscriptions.list({
+  customerId: "user_123",
+  status: "past_due",
+});
 
-if (sub.status === "past_due") {
+if (pastDue.length > 0) {
   // Show in-app banner: "Payment issue — update your payment method"
   // Link to customer portal
 }
@@ -126,16 +129,17 @@ if (sub.status === "past_due") {
 Instead of hard-blocking on `past_due`, you can show warnings while maintaining access:
 
 ```typescript
-const sub = await commet.subscriptions.getActive({ customerId: "user_123" });
+const access = await commet.featureAccess.get({
+  code: "projects",
+  customerId: "user_123",
+});
 
-if (sub.status === "past_due") {
+if (!access.allowed) {
+  // No trialing, active, or past_due subscription grants it
+  redirectToResubscribe();
+} else if (pastDue.length > 0) { // pastDue from the previous example
   // Show banner but don't block
   showPaymentWarningBanner();
-}
-
-if (sub.status === "canceled") {
-  // Hard block — subscription is gone
-  redirectToResubscribe();
 }
 ```
 

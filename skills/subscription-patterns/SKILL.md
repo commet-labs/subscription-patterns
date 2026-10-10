@@ -24,11 +24,14 @@ draft → pending_payment → trialing → active → canceled
                                               │
                                               ├→ active
                                               └→ canceled
+
+trialing / active → paused → (resume) → trialing / active
+                           └→ (cancel) → canceled
 ```
 
-The persisted statuses are `draft`, `pending_payment`, `trialing`, `active`, `past_due`, and `canceled`. Commet does not expose a pause/resume status.
+The persisted statuses are `draft`, `pending_payment`, `trialing`, `active`, `past_due`, `paused`, and `canceled`. Access is granted for `trialing`, `active`, and `past_due`; `paused` has no access.
 
-**One active subscription relationship per customer.** Treat the active endpoint and current API errors as the source of truth when deciding whether a new subscription may be created. Do not recreate lifecycle rules from stale status lists.
+**One open subscription relationship per customer.** Treat the active endpoint and current API errors as the source of truth when deciding whether a new subscription may be created. Do not recreate lifecycle rules from stale status lists.
 
 ## Quick Reference
 
@@ -44,6 +47,7 @@ The persisted statuses are `draft`, `pending_payment`, `trialing`, `active`, `pa
 | Implement failed payment retries | [dunning-and-retries.md](references/dunning-and-retries.md) |
 | Build grace period logic | [dunning-and-retries.md](references/dunning-and-retries.md) |
 | Cancel a subscription | [cancellation-flows.md](references/cancellation-flows.md) |
+| Pause and resume a subscription | [cancellation-flows.md](references/cancellation-flows.md) |
 | Reactivate a canceled subscription | [cancellation-flows.md](references/cancellation-flows.md) |
 | Add purchasable add-ons | [addons-and-extras.md](references/addons-and-extras.md) |
 | Prorate mid-cycle add-on activation | [addons-and-extras.md](references/addons-and-extras.md) |

@@ -45,7 +45,7 @@ const sub = await commet.subscriptions.create({
 - Full feature access at the plan's limits
 - Usage accumulates (metered features track consumption)
 - No invoices or charges
-- Customer can cancel at any time with no charge
+- Customer can cancel at any time; a scheduled cancellation ends at trial end without a charge
 
 ## Intro Offers
 
@@ -73,12 +73,12 @@ Percentage values use basis points (10000 = 100%). A 25% discount is stored as `
 
 ### Eligibility
 
-Current eligibility excludes a customer who already has an `active` or `past_due` subscription in the organization. Historical canceled subscriptions do not create a lifetime ban.
+Current eligibility excludes a customer who already has an `active`, `past_due`, or `paused` subscription in the organization. Historical canceled subscriptions do not create a lifetime ban.
 
 | Customer Type | Eligible? |
 |---------------|-----------|
-| No active or past-due subscription | Yes |
-| Active or past-due subscription | No |
+| No active, past-due, or paused subscription | Yes |
+| Active, past-due, or paused subscription | No |
 | Previously canceled subscription | Yes, if no current blocker remains |
 | Active customer upgrading/downgrading | No |
 
@@ -112,7 +112,7 @@ Timeline:
   Month 4+:   $99/mo (normal price)
 ```
 
-At checkout, Commet resolves one Offer source. Omitting `offerId` allows the price's automatic introductory placement when the customer is eligible. Passing a direct `offerId` overrides it. Promo Codes reference an independent single-discount Offer, but validation rejects the code with `intro_offer_active` while an eligible automatic Introductory Offer applies.
+At checkout, Commet resolves one Offer source. Omitting `offerId` allows the price's automatic introductory placement when the customer is eligible. Passing a direct `offerId` overrides it. Promo Codes reference an independent Offer with one or more discount phases, optionally preceded by a free trial, but validation rejects the code with `intro_offer_active` while an eligible automatic Introductory Offer applies.
 
 ## Gotchas
 
@@ -120,7 +120,7 @@ At checkout, Commet resolves one Offer source. Omitting `offerId` allows the pri
 
 **Intro offer credit uses effective price.** When calculating proration credits for a plan change, the credit is based on the discounted amount the customer actually paid, not the list price.
 
-**Eligibility is not a lifetime-history rule.** It currently blocks active and past-due subscriptions. Verify the creation service before changing this policy.
+**Eligibility is not a lifetime-history rule.** It currently blocks active, past-due, and paused subscriptions. Verify the creation service before changing this policy.
 
 **Currency-specific Offer phases are explicit.** `amount_off` and `fixed_price` phases carry an amount for each supported currency. Commet does not silently fall back across currencies.
 
@@ -147,9 +147,9 @@ const sub = await commet.subscriptions.create({
 ```typescript
 const sub = await commet.subscriptions.getActive({ customerId: "user_123" });
 
-if (sub.status === "trialing") {
+if (sub?.status === "trialing") {
   // Customer is in free trial
-  // sub.currentPeriod.end = trial end date
+  // sub.trialEndsAt = trial end instant
 }
 ```
 

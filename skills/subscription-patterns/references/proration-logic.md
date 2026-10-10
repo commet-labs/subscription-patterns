@@ -185,11 +185,15 @@ const portal = await commet.portal.getUrl({ customerId: "user_123" });
 const { data: features } = await commet.featureAccess.list({ customerId: "user_123" });
 
 for (const feature of features) {
-  if (feature.type === "usage" && feature.overage > 0) {
+  if (
+    feature.type === "usage" &&
+    feature.consumption.model === "metered" &&
+    feature.consumption.overage.units > 0
+  ) {
     // This overage will be settled on upgrade
-    // feature.current = total used
-    // feature.included = plan's included amount
-    // feature.overage = current - included
+    // feature.consumption.unitsUsed = total used
+    // feature.consumption.includedUnits = plan's included amount
+    // feature.consumption.overage.units = used above the included amount
   }
 }
 ```

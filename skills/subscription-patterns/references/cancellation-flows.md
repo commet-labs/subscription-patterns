@@ -15,15 +15,18 @@ End-of-period is the default and recommended approach. The customer paid for the
 
 ```
 Customer requests cancellation
-  → cancelAt set to currentPeriodEnd
-  → Status remains: active (with pending cancellation)
+  → Cancellation scheduled for the end of the current paid period
+    (trial end for a trialing subscription, which then ends without a charge)
+  → Status remains: active or trialing (with pending cancellation)
   → Customer retains full access until period ends
   → Period ends
   → Status: canceled
   → Access revoked
 ```
 
-The customer can continue using all features until the billing period expires. No credit is issued because they are using what they paid for.
+The customer can continue using all features until the billing period expires. No credit is issued because they are using what they paid for. A contiguous accepted free phase (a zero fixed price) extends the end date; later paid Offer phases do not.
+
+Free, `pending_payment`, `past_due`, and `paused` subscriptions always cancel immediately. A subscription with a scheduled pause must revoke that pause before it can be canceled.
 
 ### Code Example
 
@@ -41,7 +44,7 @@ await commet.subscriptions.cancel({
 Customer requests immediate cancellation
   → Status: canceled (now)
   → Access revoked immediately
-  → Unused time credited (prorated refund)
+  → No automatic refund or credit for unused time
 ```
 
 ### Code Example
@@ -86,6 +89,27 @@ const sub = await commet.subscriptions.reactivate({
 });
 // sub.status === "active" after the reactivation charge succeeds
 ```
+
+## Pause Instead of Cancel
+
+A pause stops access and renewals without ending the relationship. Only paid recurring subscriptions in `active` or `trialing` can be paused.
+
+```typescript
+await commet.subscriptions.pause({
+  id: "sub_xxx",
+  mode: "period_end", // or "immediate"
+  durationDays: 60,   // null = paused until resumed manually
+});
+
+await commet.subscriptions.resume({ id: "sub_xxx" });
+```
+
+| Mode | While paused | On resume |
+|------|--------------|-----------|
+| `immediate` | Access stops now; unused paid or trial time is preserved | Remaining time continues without a charge |
+| `period_end` | Access continues until period end, then the renewal is skipped | A new period is charged; access returns after payment |
+
+A declined resume charge keeps the subscription `paused` while automatic retries run; exhausting them cancels it. Canceling a paused subscription is immediate and discards its preserved time. Use `resume` for a paused subscription and `reactivate` for a canceled one.
 
 ## Save Offers (Retention Strategies)
 

@@ -66,7 +66,7 @@ When a customer deactivates an add-on, it is turned off immediately. No refund i
 |--------|----------|
 | When takes effect | Immediately |
 | Refund | None |
-| Feature access | Revoked |
+| Feature access | Revoked, unless the plan or a plan grant also provides it |
 | Next invoice | Add-on line removed |
 
 ## Billing at Renewal
@@ -151,10 +151,11 @@ const access = await commet.featureAccess.get({
   code: "extra_storage",
   customerId: "user_123",
 });
-// access.current = 35 (GB used)
-// access.included = 50 (from add-on)
-// access.remaining = 15
-// access.overage = 0
+// For a usage feature on a metered plan, access.consumption carries:
+// unitsUsed      = 35 (GB used)
+// includedUnits  = 50 (plan plus add-on)
+// remainingUnits = 15
+// overage.units  = 0
 ```
 
 ### Track usage against an add-on's metered feature
@@ -181,8 +182,8 @@ const portal = await commet.portal.getUrl({ customerId: "user_123" });
 const { data: features } = await commet.featureAccess.list({ customerId: "user_123" });
 
 for (const feature of features) {
-  // feature.code, feature.name, feature.type
-  // feature.allowed, feature.current, feature.included
+  // feature.code, feature.name, feature.type, feature.allowed
+  // usage features expose feature.consumption; seats and quota expose feature.usage
   // Works the same whether the feature comes from a plan or add-on
 }
 ```
