@@ -76,7 +76,7 @@ A canceled paid subscription can be reactivated through the dedicated operation.
 
 | Aspect | Behavior |
 |--------|----------|
-| Pricing | Current value of the selected catalog price |
+| Pricing | The selected price and interval, in the subscription's currency |
 | Offer | Optional Promotional `offerId`; accepted phases are snapshotted |
 | Balance | Existing initialized balance is not automatically reset |
 | Subscription identity | Same subscription record |
@@ -174,7 +174,7 @@ Common categories to analyze:
 
 ## Gotchas
 
-**Reactivation reuses the subscription.** It charges the current selected catalog price and restores state only after successful payment.
+**Reactivation reuses the subscription.** It charges first and restores state only after successful payment.
 
 **Uncancel and reactivate are different.** `uncancel` reverses a scheduled cancellation before it takes effect. `reactivate` restores an already canceled subscription and creates a new paid period.
 

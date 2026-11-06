@@ -25,7 +25,7 @@ Create an Offer with a first `free_trial` phase. Attach a compatible Offer to on
 
 ### Trial Conversion
 
-When the trial ends, the system charges the price **in effect at that moment** — not the price when the trial started. Trials are not a price commitment. If the founder changes the plan price mid-trial, the customer pays the new price.
+When the trial ends, the system charges the price of the plan version the subscription is on. A plan price change during the trial publishes a new version and does not reach existing trials unless the founder moves them.
 
 ### Skipping Trials
 
@@ -97,7 +97,7 @@ Customer on Starter $99/mo with 50% intro offer (paying $49.50)
 
 ### Catalog Changes
 
-Updating, deactivating, or archiving an Offer changes future selection only. Existing subscriptions keep the accepted phases stored in their Offer Application. That immutable boundary applies to the Offer terms, not the selected plan price: renewals still read the current catalog amount of the selected price.
+Updating, deactivating, or archiving an Offer changes future selection only. Existing subscriptions keep the accepted phases stored in their Offer Application. The plan price is separate from the Offer terms: renewals read the selected price in the subscription's plan version.
 
 ## Trials + Intro Offers Together
 
@@ -116,7 +116,7 @@ At checkout, Commet resolves one Offer source. Omitting `offerId` allows the pri
 
 ## Gotchas
 
-**Trial price is not locked.** The price charged at trial end is whatever the plan costs at that moment. If you raise prices during someone's trial, they pay the new price.
+**Trial price follows the plan version.** The price charged at trial end is the price of the subscription's plan version. If you raise prices during someone's trial, they pay the old price unless you move them to the new version.
 
 **Intro offer credit uses effective price.** When calculating proration credits for a plan change, the credit is based on the discounted amount the customer actually paid, not the list price.
 

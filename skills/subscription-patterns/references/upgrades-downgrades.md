@@ -90,6 +90,10 @@ Interval direction is evaluated before plan-group order. A move to a longer inte
 
 Plan changes only happen within the same **plan group**. A plan group defines which plans are upgrade/downgrade paths of each other (e.g., Starter, Pro, Enterprise). You cannot change from a plan in one group to a plan in another group — that requires canceling and creating a new subscription.
 
+A change to another plan lands on that plan's current version. The subscription's currency never changes, so the target plan must sell that currency in the customer's country; otherwise the change is refused and the portal does not offer that plan.
+
+Moving a subscription to a newer version of its own plan is not an upgrade or downgrade: it never prorates or restarts the period.
+
 ## Code Examples
 
 ### Create a subscription the customer can later upgrade

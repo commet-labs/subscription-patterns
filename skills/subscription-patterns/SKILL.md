@@ -54,4 +54,4 @@ The persisted statuses are `draft`, `pending_payment`, `trialing`, `active`, `pa
 
 ## Key Principle
 
-Do not infer subscription behavior from a generic fairness rule. In Commet, plan changes are classified from billing interval, plan-group order, and paid/free transitions. Price edits affect renewal through the selected catalog price, while accepted Offer phases remain immutable. Use the linked reference for the exact operation you are implementing.
+Do not infer subscription behavior from a generic fairness rule. In Commet, plan changes are classified from billing interval, plan-group order, and paid/free transitions. Every subscription is pinned to a version of its plan: a plan edit publishes a new version for new subscribers, and existing subscriptions keep their version's prices and features until the merchant moves them, now or at renewal. Accepted Offer phases remain immutable. Use the linked reference for the exact operation you are implementing.
