@@ -33,6 +33,8 @@ The persisted statuses are `draft`, `pending_payment`, `trialing`, `active`, `pa
 
 **One open subscription relationship per customer.** Treat the active endpoint and current API errors as the source of truth when deciding whether a new subscription may be created. Do not recreate lifecycle rules from stale status lists.
 
+**An unpaid checkout is not a subscriber yet.** A `draft` or `pending_payment` subscription follows the latest version of what was requested: the plan's current version for a plan code, the experiment's latest version for an experiment code such as `pro:price-test`, or the exact version for a `planVersionId`. Repeating the same creation request reuses it (200, same subscription and checkout link). A different plan, experiment, version, interval, or price replaces it: the old subscription is canceled, its invoice voided, and its link expired.
+
 ## Quick Reference
 
 | Task | File |

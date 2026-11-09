@@ -148,7 +148,7 @@ If a customer upgrades and then immediately requests a downgrade, the downgrade 
 
 ## Price Changes and Proration
 
-In Commet, every subscription is pinned to a version of its plan. A price change by the founder publishes a new plan version for new subscribers; existing subscriptions keep paying their version's price until the founder moves them. A move never prorates: moved now, features and allowances change at once and the new price applies from the next renewal; moved at renewal, everything changes at that renewal.
+In Commet, every subscription is pinned to a version of its plan. A price change by the founder publishes a new plan version for new subscribers; existing subscriptions keep paying their version's price until the founder moves them. A move never prorates: moved now, features and allowances change at once and the new price applies from the next renewal; moved at renewal, nothing in the current period changes (balance, usage checks, features, and access stay) and everything changes at that renewal.
 
 ```
 Day 1: Price = $99, Customer A subscribes (version 1)

@@ -15,7 +15,7 @@ Customer subscribes to plan with trial
   → Status: trialing (trialEndsAt set, normalized to midnight UTC)
   → Full access, no charge, usage accumulates
   → Trial expires (billing cron detects trialEndsAt <= now)
-  → First invoice generated at current plan price
+  → First invoice generated at the price of the subscription's plan version
   → Status: active
 ```
 
@@ -26,6 +26,8 @@ Create an Offer with a first `free_trial` phase. Attach a compatible Offer to on
 ### Trial Conversion
 
 When the trial ends, the system charges the price of the plan version the subscription is on. A plan price change during the trial publishes a new version and does not reach existing trials unless the founder moves them.
+
+A trial moved at renewal converts on the new version. The move is dated at the trial end (`scheduledVersionChange.effectiveAt`), nothing changes during the trial, and the first charge is already on the new version.
 
 ### Skipping Trials
 

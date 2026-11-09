@@ -28,6 +28,10 @@ The customer can continue using all features until the billing period expires. N
 
 Free, `pending_payment`, `past_due`, and `paused` subscriptions always cancel immediately. A subscription with a scheduled pause must revoke that pause before it can be canceled.
 
+### Pending Plan Version Moves
+
+A subscription that ends, at period or trial end or immediately, ends on its plan version. A version move scheduled for its renewal is dropped: `scheduledVersionChange` becomes `null` and no version webhook is sent. While the cancellation is only scheduled, the API and the plan's Subscribers tab still show the move with its date, and `uncancel` lets it apply at renewal.
+
 ### Code Example
 
 ```typescript
@@ -76,7 +80,9 @@ A canceled paid subscription can be reactivated through the dedicated operation.
 
 | Aspect | Behavior |
 |--------|----------|
-| Pricing | The selected price and interval, in the subscription's currency |
+| Plan version | The latest version of what was bought: the plan's current version for a plan code, the experiment's latest version for an experiment code while it runs (otherwise the plan's current version), or the same version for a `planVersionId` |
+| Pricing | The selected price and interval on that version, in the subscription's currency. A version that does not sell that currency refuses with `422 missing_regional_price` |
+| Add-ons | Active add-ons that version does not sell are deactivated |
 | Offer | Optional Promotional `offerId`; accepted phases are snapshotted |
 | Balance | Existing initialized balance is not automatically reset |
 | Subscription identity | Same subscription record |
@@ -108,6 +114,8 @@ await commet.subscriptions.resume({ id: "sub_xxx" });
 |------|--------------|-----------|
 | `immediate` | Access stops now; unused paid or trial time is preserved | Remaining time continues without a charge |
 | `period_end` | Access continues until period end, then the renewal is skipped | A new period is charged; access returns after payment |
+
+After an immediate pause and resume, a version move scheduled at renewal applies at the next renewal that actually happens, and `scheduledVersionChange.effectiveAt` shows that date.
 
 A declined resume charge keeps the subscription `paused` while automatic retries run; exhausting them cancels it. Canceling a paused subscription is immediate and discards its preserved time. Use `resume` for a paused subscription and `reactivate` for a canceled one.
 
