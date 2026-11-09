@@ -31,6 +31,10 @@ During `past_due`, the customer retains full access to their subscription. This 
 
 The original renewal decline is day 0. Automatic retries are anchored to that instant on days 1, 3, 5, and 7. If a retry succeeds, the subscription returns to `active` without creating a new subscription. The fourth declined retry exhausts dunning and cancels the subscription.
 
+### Pending Plan Version Moves
+
+A `past_due` subscription keeps its plan version while Commet collects the overdue renewal. Once that renewal is paid, by a retry or a manual reactivation, the subscription keeps renewing and a version move scheduled at renewal applies at the end of the period it paid for; `scheduledVersionChange.effectiveAt` shows that date meanwhile. Exhausted dunning ends the subscription on its version: the move is dropped with no version webhook.
+
 ## What Happens to Consumption
 
 | Resource | During past_due | On Cancellation |

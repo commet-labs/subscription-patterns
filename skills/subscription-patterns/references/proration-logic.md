@@ -148,18 +148,22 @@ If a customer upgrades and then immediately requests a downgrade, the downgrade 
 
 ## Price Changes and Proration
 
-Price changes (made by the founder) do not trigger mid-cycle proration. The principle: the customer already paid for the current period. Any price change — increase or decrease — applies at the next renewal.
+In Commet, every subscription is pinned to a version of its plan. A price change by the founder publishes a new plan version for new subscribers; existing subscriptions keep paying their version's price until the founder moves them. A move never prorates: moved now, features and allowances change at once and the new price applies from the next renewal; moved at renewal, nothing in the current period changes (balance, usage checks, features, and access stay) and everything changes at that renewal.
 
 ```
-Day 1: Price = $99, Customer A subscribes
-Day 10: Founder changes price to $119
-Day 20: Founder changes price to $109
+Day 1: Price = $99, Customer A subscribes (version 1)
+Day 10: Founder changes price to $119 (version 2)
+Day 20: Founder changes price to $109 (version 3)
 
-Customer A's current period: $99 (what they paid at start)
-Customer A's next renewal: $109 (price in effect at renewal time)
+Customer A's current period: $99
+Customer A's next renewal: $99 (still on version 1)
+New customers from day 20: $109
+
+Founder moves Customer A to version 3 at renewal:
+Customer A's next renewal: $109
 ```
 
-Each customer pays what was in effect at the start of **their** period.
+Decide what happens to existing customers every time you change a price: keep them, move them at renewal, or move them now.
 
 ## Code Examples
 

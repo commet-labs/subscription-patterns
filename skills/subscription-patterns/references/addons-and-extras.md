@@ -50,11 +50,12 @@ Next renewal (Jan 31):
 ### Activation Steps
 
 1. Validate consumption model compatibility with current plan
-2. Resolve price to subscription currency (via exchange rate if non-USD)
-3. Calculate prorated charge: `fullPrice x (daysRemaining / totalDays)`
-4. If charge > $0: process payment with tax
-5. Create add-on record (status = active)
-6. Feature becomes available immediately
+2. Check that the subscription's plan version sells the add-on; an add-on that only a newer version sells is refused until the subscription moves to that version
+3. Resolve the price the subscription's plan version sets for the add-on in the subscription's country and currency
+4. Calculate prorated charge: `fullPrice x (daysRemaining / totalDays)`
+5. If charge > $0: process payment with tax
+6. Create add-on record (status = active)
+7. Feature becomes available immediately
 
 The prorated charge creates a separate invoice with type `addon_activation`.
 
@@ -194,6 +195,6 @@ for (const feature of features) {
 
 **Deactivation is immediate with no refund.** Unlike plan downgrades (which wait until period end), add-on deactivation takes effect now. The customer chose to remove it.
 
-**Add-on pricing is in USD settlement cents.** At activation, the price is converted to the subscription's currency using the plan's exchange rate.
+**Add-on pricing belongs to the plan version.** An add-on's base price is in USD settlement cents. Each plan version sells its own set of add-ons, priced per country by hand or following the USD price at the country's exchange rate, and activation uses the subscription's version.
 
 **Boolean add-ons work on any plan.** You do not need to check the plan's consumption model for boolean add-ons. They always work.

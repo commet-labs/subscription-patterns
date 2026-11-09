@@ -86,9 +86,17 @@ Changing the billing interval uses a fixed order: weekly, monthly, quarterly, ye
 
 Interval direction is evaluated before plan-group order. A move to a longer interval is immediate even when the target plan has a lower order; a move to a shorter interval is scheduled even when the target plan has a higher order. When the interval stays the same, plan-group order decides.
 
+After an interval change, a plan version move scheduled at renewal applies at the next renewal that actually happens, and `scheduledVersionChange.effectiveAt` shows that date.
+
 ## Plan Groups
 
 Plan changes only happen within the same **plan group**. A plan group defines which plans are upgrade/downgrade paths of each other (e.g., Starter, Pro, Enterprise). You cannot change from a plan in one group to a plan in another group — that requires canceling and creating a new subscription.
+
+A change to another plan, now or at renewal (including a scheduled downgrade or a cancellation into the plan group's default plan), lands on that plan's current version. The subscription's currency never changes, so the target plan must sell that currency in the customer's country; otherwise the change is refused and the portal does not offer that plan.
+
+A version move pending on the old plan is dropped by the plan change, with no `subscription.version_changed`. While a downgrade is only scheduled, the API and the plan's Subscribers tab still show the move with its date; revoking the downgrade lets the move apply at renewal.
+
+Moving a subscription to a newer version of its own plan is not an upgrade or downgrade: it never prorates or restarts the period.
 
 ## Code Examples
 
